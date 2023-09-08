@@ -46,10 +46,15 @@ module.exports = function (Categories) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 database_1.default.sortedSetsScore(keys, uid),
             ]);
-            // The next line calls a function in a module that has not been updated to TS yet
-            /* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,
-               @typescript-eslint/no-unsafe-return */
-            return states.map((state) => state || Categories.watchStates[userSettings.categoryWatchState]);
+            const user_watch_state = userSettings.categoryWatchState;
+            let curr_state = -1;
+            if (user_watch_state === 1)
+                curr_state = Categories.watchStates.ignoring;
+            else if (user_watch_state === 2)
+                curr_state = Categories.watchStates.notwatching;
+            else if (user_watch_state === 3)
+                curr_state = Categories.watchStates.watching;
+            return states.map((state) => state || curr_state);
         });
     };
     Categories.getIgnorers = function (cid, start, stop) {
@@ -80,11 +85,18 @@ module.exports = function (Categories) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 database_1.default.sortedSetScores(`cid:${cid}:uid:watch:state`, uids),
             ]);
-            // The next line calls a function in a module that has not been updated to TS yet
-            /* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,
-               @typescript-eslint/no-unsafe-return */
-            return states.map((state, index) => state ||
-                Categories.watchStates[userSettings[index].categoryWatchState]);
+            function helper(index) {
+                const user_watch_state = userSettings[index].categoryWatchState;
+                let curr_state = -1;
+                if (user_watch_state === 1)
+                    curr_state = Categories.watchStates.ignoring;
+                else if (user_watch_state === 2)
+                    curr_state = Categories.watchStates.notwatching;
+                else if (user_watch_state === 3)
+                    curr_state = Categories.watchStates.watching;
+                return curr_state;
+            }
+            return states.map((state, index) => state || helper(index));
         });
     };
 };
